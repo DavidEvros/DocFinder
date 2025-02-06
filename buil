@@ -1,0 +1,89 @@
+import { useState } from "react";
+import { Card, CardContent } from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
+import { Button } from "@/components/ui/button";
+import { User, Search, Mail, Briefcase, FileText, Star, ShieldCheck, Building, MessageCircle, Edit } from "lucide-react";
+
+const data = [
+  { name: "Dr. Juan Pérez", specialty: "Cardiología", location: "Madrid", email: "juanperez@mail.com", working: true, openToWork: false, company: "Hospital Central", rating: 4.5, photo: "/images/juan.jpg" },
+  { name: "Dra. María López", specialty: "Pediatría", location: "Barcelona", email: "marialopez@mail.com", working: false, openToWork: true, company: "Clínica San José", rating: 4.8, photo: "/images/maria.jpg" },
+  { name: "Enf. Luis Martínez", specialty: "Enfermería", location: "Valencia", email: "luismartinez@mail.com", working: true, openToWork: true, company: "Centro Médico Valencia", rating: 4.2, photo: "/images/luis.jpg" }
+];
+
+export default function Directory() {
+  const [search, setSearch] = useState("");
+  const [filterRating, setFilterRating] = useState(0);
+  const searchLower = search.toLowerCase();
+
+  // Filtro para incluir tanto la búsqueda de texto como el filtro de calificación
+  const filteredData = data.filter(person =>
+    (person.name.toLowerCase().includes(searchLower) ||
+    person.specialty.toLowerCase().includes(searchLower) ||
+    person.location.toLowerCase().includes(searchLower) ||
+    person.company.toLowerCase().includes(searchLower)) &&
+    person.rating >= filterRating
+  );
+
+  const toggleWorkingStatus = (index) => {
+    data[index].working = !data[index].working;
+    // Puede implementar un método de actualización de datos más robusto aquí si usa un backend
+    alert(`El estado de trabajo de ${data[index].name} ha sido actualizado`);
+  };
+
+  return (
+    <div className="p-6 max-w-lg mx-auto">
+      <h1 className="text-2xl font-bold mb-4">Directorio de Profesionales de la Salud</h1>
+      <div className="flex items-center space-x-2 mb-4">
+        <Input
+          placeholder="Buscar por nombre, especialidad, ubicación o empresa"
+          value={search}
+          onChange={(e) => setSearch(e.target.value)}
+        />
+        <Button variant="outline">
+          <Search className="w-5 h-5" />
+        </Button>
+      </div>
+      
+      <div className="mb-4">
+        <label className="text-sm font-medium">Filtrar por calificación mínima</label>
+        <Input
+          type="number"
+          min="0"
+          max="5"
+          value={filterRating}
+          onChange={(e) => setFilterRating(parseFloat(e.target.value))}
+          placeholder="Seleccionar calificación"
+        />
+      </div>
+
+      <div className="space-y-4">
+        {filteredData.map((person, index) => (
+          <Card key={index} className="p-4 flex items-center space-x-4">
+            <img src={person.photo || "/images/default.jpg"} alt={person.name} className="w-12 h-12 rounded-full" onError={(e) => e.target.src = "/images/default.jpg"} />
+            <CardContent>
+              <p className="text-lg font-semibold">{person.name}</p>
+              <p className="text-gray-600">{person.specialty} - {person.location}</p>
+              <p className="text-sm text-blue-600 flex items-center"><Mail className="w-4 h-4 mr-2" />{person.email}</p>
+              <p className="text-sm text-gray-500 flex items-center"><Briefcase className="w-4 h-4 mr-2" />{person.working ? "Laborando" : "Disponible"}</p>
+              <p className="text-sm text-green-600">{person.openToWork ? "Abierto a nuevas oportunidades" : "No disponible para cambios"}</p>
+              <p className="text-sm text-gray-600 flex items-center"><Building className="w-4 h-4 mr-2" />{person.company}</p>
+              <p className="text-sm text-yellow-500 flex items-center"><Star className="w-4 h-4 mr-2" />{person.rating} / 5</p>
+              
+              <div className="flex space-x-2">
+                <Button variant="link" className="text-blue-500 flex items-center">
+                  <FileText className="w-4 h-4 mr-2" /> Ver Hoja de Vida
+                </Button>
+                <Button variant="link" className="text-blue-500 flex items-center" onClick={() => confirm("¿Deseas enviar un mensaje a este usuario?") && alert("Mensaje enviado") }>
+                  <MessageCircle className="w-4 h-4 mr-2" /> Enviar Mensaje
+                </Button>
+                <Button variant="outline" className="flex items-center" onClick={() => toggleWorkingStatus(index)}>
+                  <Edit className="w-4 h-4 mr-2" /> Cambiar estado
+                </Button>
+              </div>
+            </CardContent>
+          </Card>
+        ))}
+      </div>
+    </div>
+  );
+}
